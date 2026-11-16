@@ -257,11 +257,27 @@
     { q: "In what year did the first crew move into the International Space Station?", a: ["1998", "2000", "2003", "2011"], c: 1 },
   ];
 
+  function shuffle(arr) {
+    const out = [...arr];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    return out;
+  }
+
+  function shuffledQuestions() {
+    return shuffle(QUESTIONS).map(({ q, a, c }) => {
+      const order = shuffle(a.map((_, i) => i));
+      return { q, a: order.map(i => a[i]), c: order.indexOf(c) };
+    });
+  }
+
   const card = document.getElementById("card");
-  let index = 0, score = 0;
+  let questions = shuffledQuestions(), index = 0, score = 0;
 
   function renderQuestion(moveFocus = false) {
-    const item = QUESTIONS[index];
+    const item = questions[index];
     card.innerHTML = `
       <div class="fade">
         <div class="meta">
@@ -290,7 +306,7 @@
   }
 
   function choose(i) {
-    const item = QUESTIONS[index];
+    const item = questions[index];
     const buttons = [...card.querySelectorAll(".option")];
     const fb = document.getElementById("feedback");
     buttons.forEach(b => b.disabled = true);
@@ -342,7 +358,7 @@
         <p>${msg}</p>
         <button class="btn" id="restart">Play again</button>
       </div>`;
-    document.getElementById("restart").addEventListener("click", () => { index = 0; score = 0; renderQuestion(true); });
+    document.getElementById("restart").addEventListener("click", () => { questions = shuffledQuestions(); index = 0; score = 0; renderQuestion(true); });
     document.getElementById("result-title").focus();
     announce(`Quiz complete. You scored ${score} out of ${QUESTIONS.length}. ${title}`);
   }
